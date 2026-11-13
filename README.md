@@ -70,7 +70,8 @@ does not change the administrator's current login. User and role responses inclu
 passwords are never returned.
 
 For state-changing requests, send `X-XSRF-TOKEN` with the token returned by `/csrf` or the value of
-the `XSRF-TOKEN` cookie, together with that cookie. Authentication uses the `BIBLIUM_AUTH` cookie.
+the `XSRF-TOKEN` cookie, together with that cookie. Both cookies are HttpOnly; browser JavaScript
+reads the CSRF token from `/csrf`. Authentication uses the `BIBLIUM_AUTH` cookie.
 
 Order date filters use `GET /orders?choice=1&date=2026-11-13`: choices 1–3 select issue date
 equal/before/after; 4–6 select due date equal/before/after. Due-date extensions use
