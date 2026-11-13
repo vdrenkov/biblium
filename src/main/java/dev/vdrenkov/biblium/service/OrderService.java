@@ -32,14 +32,14 @@ public class OrderService {
     @Transactional
     public Order addOrder(final OrderRequest orderRequest) {
 
-        if (orderRequest.getBooksIds().isEmpty()) {
+        if (orderRequest.booksIds().isEmpty()) {
             throw new IllegalArgumentException("At least one book ID is required to create an order");
         }
 
-        validateNoDuplicateBookIds(orderRequest.getBooksIds());
+        validateNoDuplicateBookIds(orderRequest.booksIds());
 
-        final Client client = clientService.getClientById(orderRequest.getClientId());
-        final List<Book> books = orderRequest.getBooksIds()
+        final Client client = clientService.getClientById(orderRequest.clientId());
+        final List<Book> books = orderRequest.booksIds()
             .stream()
             .sorted()
             .map(bookService::decreaseBookQuantity)

@@ -76,7 +76,7 @@ class AuthorServiceTest {
 
         final AuthorDto result = authorService.getAuthorDtoById(ID);
 
-        assertNotNull(result.getName());
+        assertNotNull(result.name());
     }
 }
 

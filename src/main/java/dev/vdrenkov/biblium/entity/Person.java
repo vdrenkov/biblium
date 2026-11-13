@@ -5,13 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
 @MappedSuperclass
 public class Person {
 
@@ -29,5 +23,26 @@ public class Person {
     public Person(String name, String surname) {
         this.name = name;
         this.surname = surname;
+    }
+
+    public Person() {
+    }
+
+    public Person(final int id, final String name, final String surname) {
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getSurname() {
+        return surname;
     }
 }

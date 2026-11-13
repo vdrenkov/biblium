@@ -1,10 +1,15 @@
 package dev.vdrenkov.biblium.request;
 
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
-@NoArgsConstructor
-public class AuthorRequest extends PersonRequest {
-    public AuthorRequest(final String name, final String surname) {
-        super(name, surname);
-    }
+public record AuthorRequest(
+    @Pattern(regexp = "^[A-Z][a-z. ]+$",
+        message = "The name should contain only letters, spaces and/or dots and should start with a capital letter.")
+    @NotNull(message = "The name cannot be null")
+    String name,
+    @Pattern(regexp = "^[A-Z][a-z. ]+$",
+        message = "The name should contain only letters, spaces and/or dots and should start with a capital letter.")
+    @NotNull(message = "The surname cannot be null")
+    String surname) {
 }

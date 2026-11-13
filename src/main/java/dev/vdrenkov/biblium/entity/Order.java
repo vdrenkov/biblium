@@ -10,18 +10,12 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -51,6 +45,41 @@ public class Order {
         this.client = client;
         this.books = books;
         this.issueDate = issueDate;
+        this.dueDate = dueDate;
+    }
+
+    public Order() {
+    }
+
+    public Order(final int id, final Client client, final List<Book> books, final LocalDate issueDate, final LocalDate dueDate) {
+        this.id = id;
+        this.client = client;
+        this.books = books;
+        this.issueDate = issueDate;
+        this.dueDate = dueDate;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public List<Book> getBooks() {
+        return books;
+    }
+
+    public LocalDate getIssueDate() {
+        return issueDate;
+    }
+
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(final LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 }

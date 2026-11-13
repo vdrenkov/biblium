@@ -6,13 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
 @Entity
 @Table(name = "user_roles")
 public class UserRole {
@@ -27,5 +21,21 @@ public class UserRole {
 
     public UserRole(final String role) {
         this.role = role;
+    }
+
+    public UserRole() {
+    }
+
+    public UserRole(final int id, final String role) {
+        this.id = id;
+        this.role = role;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getRole() {
+        return role;
     }
 }

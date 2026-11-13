@@ -3,11 +3,7 @@ package dev.vdrenkov.biblium.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
-@Getter
 @Entity
 @Table(name = "clients")
 public class Client extends Person {
@@ -28,5 +24,16 @@ public class Client extends Person {
         super(name, surname);
         this.phoneNumber = phoneNumber;
         this.email = email;
+    }
+
+    public Client() {
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public String getEmail() {
+        return email;
     }
 }

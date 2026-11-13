@@ -8,17 +8,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
 @Entity
 @Table(name = "books")
 public class Book {
@@ -46,6 +40,45 @@ public class Book {
         this.name = name;
         this.publishDate = publishDate;
         this.author = author;
+        this.quantity = quantity;
+    }
+
+    public Book() {
+    }
+
+    public Book(final int id, final String name, final LocalDate publishDate, final Author author, final int quantity) {
+        this.id = id;
+        this.name = name;
+        this.publishDate = publishDate;
+        this.author = author;
+        this.quantity = quantity;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public LocalDate getPublishDate() {
+        return publishDate;
+    }
+
+    public Author getAuthor() {
+        return author;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setId(final int id) {
+        this.id = id;
+    }
+
+    public void setQuantity(final int quantity) {
         this.quantity = quantity;
     }
 }

@@ -10,15 +10,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
 @Entity
 @Table(name = "users")
 public class User {
@@ -43,5 +37,31 @@ public class User {
         this.username = username;
         this.password = password;
         this.userRoles = userRoles;
+    }
+
+    public User() {
+    }
+
+    public User(final int id, final String username, final String password, final List<UserRole> userRoles) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.userRoles = userRoles;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public List<UserRole> getUserRoles() {
+        return userRoles;
     }
 }

@@ -6,15 +6,12 @@ import dev.vdrenkov.biblium.exception.ClientNotFoundException;
 import dev.vdrenkov.biblium.mapper.ClientMapper;
 import dev.vdrenkov.biblium.repository.ClientRepository;
 import dev.vdrenkov.biblium.request.ClientRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class ClientService {
-    private static final Logger log = LoggerFactory.getLogger(ClientService.class);
 
     private final ClientRepository clientRepository;
 
@@ -23,15 +20,13 @@ public class ClientService {
     }
 
     public Client addClient(final ClientRequest clientRequest) {
-        final Client client = new Client(clientRequest.getName(), clientRequest.getSurname(),
-            clientRequest.getPhoneNumber(), clientRequest.getEmail());
+        final Client client = new Client(clientRequest.name(), clientRequest.surname(),
+            clientRequest.phoneNumber(), clientRequest.email());
 
-        log.info("Trying to add a new client");
         return clientRepository.save(client);
     }
 
     public List<Client> getAllClients() {
-        log.info("Trying to retrieve all clients");
         return clientRepository.findAll();
     }
 
@@ -40,7 +35,6 @@ public class ClientService {
     }
 
     public Client getClientById(final int id) {
-        log.info("Trying to retrieve client with an ID {}", id);
         return clientRepository.findById(id).orElseThrow(ClientNotFoundException::new);
     }
 

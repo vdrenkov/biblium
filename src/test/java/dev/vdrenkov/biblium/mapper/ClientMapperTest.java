@@ -6,21 +6,21 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ClientMapperTest {
 
     @Test
-    void testMapClientsToClientsDto() {
+    void mapClientsToClientsDto_clientList_preservesAllFields() {
         final List<ClientDto> clientsDto = ClientMapper.mapClientsToClientsDto(ClientFactory.getDefaultClientsList());
 
-        assertNotNull(clientsDto);
+        assertEquals(ClientFactory.getDefaultClientsDtoList(), clientsDto);
     }
 
     @Test
-    void testMapClientToClientDto() {
+    void mapClientToClientDto_client_preservesAllFields() {
         final ClientDto clientDto = ClientMapper.mapClientToClientDto(ClientFactory.getDefaultClient());
 
-        assertNotNull(clientDto);
+        assertEquals(ClientFactory.getDefaultClientDto(), clientDto);
     }
 }

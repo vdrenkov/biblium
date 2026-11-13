@@ -75,7 +75,7 @@ class ClientServiceTest {
 
         final ClientDto result = clientService.getClientDtoById(ID);
 
-        assertNotNull(result.getName());
+        assertNotNull(result.name());
     }
 }
 

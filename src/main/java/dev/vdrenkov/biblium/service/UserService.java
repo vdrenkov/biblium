@@ -38,17 +38,17 @@ public class UserService {
     @Transactional
     public User createUser(final CreateUserRequest request) {
 
-        if (userRepository.existsByUsername(request.getUsername())) {
+        if (userRepository.existsByUsername(request.username())) {
             throw new IllegalArgumentException("A user with this username already exists");
         }
 
-        final var roles = request.getRolesIds()
+        final var roles = request.rolesIds()
             .stream()
             .distinct()
             .map(userRoleService::getUserRoleById)
             .toList();
-        final String password = passwordEncoder.encode(request.getPassword());
-        return userRepository.save(new User(request.getUsername(), password, roles));
+        final String password = passwordEncoder.encode(request.password());
+        return userRepository.save(new User(request.username(), password, roles));
     }
 
     @Transactional(readOnly = true)
@@ -64,7 +64,7 @@ public class UserService {
 
     public HttpCookie login(final UserRequest request) {
         final var authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+            new UsernamePasswordAuthenticationToken(request.username(), request.password()));
         return jwtCookieUtil.createJWTCookie((UserDetails) authentication.getPrincipal());
     }
 }

@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class RoleBootstrapRunnerTest {
@@ -33,7 +35,7 @@ class RoleBootstrapRunnerTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    void testRun_bootstrapsMissingRoles() {
+    void run_missingRoles_createsBothStaffRoles() {
         when(userRoleRepository.existsByRole("ADMIN")).thenReturn(false);
         when(userRoleRepository.existsByRole("LIBRARIAN")).thenReturn(false);
 
@@ -42,8 +44,12 @@ class RoleBootstrapRunnerTest {
 
         runner.run();
 
-        verify(userRoleRepository).save(new UserRole("ADMIN"));
-        verify(userRoleRepository).save(new UserRole("LIBRARIAN"));
+        final ArgumentCaptor<UserRole> roleCaptor = ArgumentCaptor.forClass(UserRole.class);
+        verify(userRoleRepository, times(2)).save(roleCaptor.capture());
+        assertEquals(List.of("ADMIN", "LIBRARIAN"), roleCaptor.getAllValues()
+            .stream()
+            .map(UserRole::getRole)
+            .toList());
         verify(userRepository, never()).save(any(User.class));
     }
 

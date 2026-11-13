@@ -7,8 +7,6 @@ import dev.vdrenkov.biblium.exception.BookNotFoundException;
 import dev.vdrenkov.biblium.mapper.BookMapper;
 import dev.vdrenkov.biblium.repository.BookRepository;
 import dev.vdrenkov.biblium.request.BookRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +14,6 @@ import java.util.List;
 
 @Service
 public class BookService {
-    private static final Logger log = LoggerFactory.getLogger(BookService.class);
 
     private final AuthorService authorService;
     private final BookRepository bookRepository;
@@ -27,15 +24,13 @@ public class BookService {
     }
 
     public Book addBook(final BookRequest bookRequest) {
-        final Author bookAuthor = authorService.getAuthorById(bookRequest.getAuthorId());
+        final Author bookAuthor = authorService.getAuthorById(bookRequest.authorId());
 
-        log.info("Trying to add a new book");
         return bookRepository.save(
-            new Book(bookRequest.getName(), bookRequest.getPublishDate(), bookAuthor, bookRequest.getQuantity()));
+            new Book(bookRequest.name(), bookRequest.publishDate(), bookAuthor, bookRequest.quantity()));
     }
 
     public List<Book> getAllBooks() {
-        log.info("Trying to retrieve all books");
         return bookRepository.findAll();
     }
 
@@ -56,7 +51,6 @@ public class BookService {
     }
 
     public Book getBookById(final int id) {
-        log.info("Trying to retrieve book with an ID {}", id);
         return bookRepository.findById(id).orElseThrow(BookNotFoundException::new);
     }
 
@@ -73,7 +67,6 @@ public class BookService {
 
         book.setQuantity(book.getQuantity() - 1);
 
-        log.info("Trying to update book with an ID {}", id);
         return bookRepository.save(book);
     }
 }

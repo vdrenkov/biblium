@@ -6,21 +6,21 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AuthorMapperTest {
 
     @Test
-    void testMapAuthorsToAuthorsDto() {
+    void mapAuthorsToAuthorsDto_authorList_preservesAllFields() {
         final List<AuthorDto> authorsDto = AuthorMapper.mapAuthorsToAuthorsDto(AuthorFactory.getDefaultAuthorsList());
 
-        assertNotNull(authorsDto);
+        assertEquals(AuthorFactory.getDefaultAuthorsDtoList(), authorsDto);
     }
 
     @Test
-    void testMapAuthorToAuthorDto() {
+    void mapAuthorToAuthorDto_author_preservesAllFields() {
         final AuthorDto authorDto = AuthorMapper.mapAuthorToAuthorDto(AuthorFactory.getDefaultAuthor());
 
-        assertNotNull(authorDto);
+        assertEquals(AuthorFactory.getDefaultAuthorDto(), authorDto);
     }
 }
