@@ -1,6 +1,7 @@
 package dev.vdrenkov.biblium.jwt;
 
 import jakarta.servlet.FilterChain;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -52,7 +53,6 @@ class JwtRequestFilterTest {
 
         when(jwtTokenUtil.getUsernameFromToken("jwt-token")).thenReturn("librarian");
         when(jwtUserDetailsService.loadUserByUsername("librarian")).thenReturn(userDetails);
-        when(jwtTokenUtil.validateToken("jwt-token", userDetails)).thenReturn(true);
         when(userDetails.getAuthorities()).thenReturn(Collections.emptyList());
 
         jwtRequestFilter.doFilter(request, response, filterChain);
@@ -78,9 +78,7 @@ class JwtRequestFilterTest {
         request.setCookies(new Cookie(JWT_COOKIE_NAME, "jwt-token"));
         final MockHttpServletResponse response = new MockHttpServletResponse();
 
-        when(jwtTokenUtil.getUsernameFromToken("jwt-token")).thenReturn("librarian");
-        when(jwtUserDetailsService.loadUserByUsername("librarian")).thenReturn(userDetails);
-        when(jwtTokenUtil.validateToken("jwt-token", userDetails)).thenReturn(false);
+        when(jwtTokenUtil.getUsernameFromToken("jwt-token")).thenThrow(new JwtException("Invalid token"));
 
         jwtRequestFilter.doFilter(request, response, filterChain);
 

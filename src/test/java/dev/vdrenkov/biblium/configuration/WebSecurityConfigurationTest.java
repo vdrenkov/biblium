@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
@@ -35,7 +34,6 @@ import static dev.vdrenkov.biblium.jwt.JwtConstants.JWT_COOKIE_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -101,7 +99,7 @@ class WebSecurityConfigurationTest {
         when(authorService.getAllAuthorsDto()).thenReturn(Collections.emptyList());
 
         mockMvc
-            .perform(get("/authors").with(user("librarian").authorities(new SimpleGrantedAuthority("LIBRARIAN"))))
+            .perform(get("/authors").cookie(staffCookie("LIBRARIAN")))
             .andExpect(status().isOk());
     }
 
@@ -110,7 +108,7 @@ class WebSecurityConfigurationTest {
         mockMvc
             .perform(delete("/clients/1")
                 .cookie(new Cookie("XSRF-TOKEN", "test-csrf-token")).header("X-XSRF-TOKEN", "test-csrf-token")
-                .with(user("librarian").authorities(new SimpleGrantedAuthority("LIBRARIAN"))))
+                .cookie(staffCookie("LIBRARIAN")))
             .andExpect(status().isForbidden());
     }
 
@@ -120,8 +118,26 @@ class WebSecurityConfigurationTest {
 
         mockMvc
             .perform(
-                delete("/clients/1").cookie(new Cookie("XSRF-TOKEN", "test-csrf-token")).header("X-XSRF-TOKEN", "test-csrf-token").with(user("admin").authorities(new SimpleGrantedAuthority("ADMIN"))))
+                delete("/clients/1").cookie(new Cookie("XSRF-TOKEN", "test-csrf-token")).header("X-XSRF-TOKEN", "test-csrf-token").cookie(staffCookie("ADMIN")))
             .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void login_tokenFromCsrfResponse_acceptsEncodedHeaderToken() throws Exception {
+        when(userService.login(any(UserRequest.class)))
+            .thenReturn(ResponseCookie.from(JWT_COOKIE_NAME, "jwt-token").httpOnly(true).path("/").build());
+        final var csrfResponse = mockMvc.perform(get("/csrf")).andReturn().getResponse();
+        final String token = objectMapper.readTree(csrfResponse.getContentAsString()).get("token").asString();
+
+        mockMvc
+            .perform(post("/login")
+                .cookie(csrfResponse.getCookie("XSRF-TOKEN"))
+                .header("X-XSRF-TOKEN", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"username":"librarian","password":"password123"}
+                    """))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -131,7 +147,7 @@ class WebSecurityConfigurationTest {
         mockMvc
             .perform(post("/users")
                 .cookie(new Cookie("XSRF-TOKEN", "test-csrf-token")).header("X-XSRF-TOKEN", "test-csrf-token")
-                .with(user("admin").authorities(new SimpleGrantedAuthority("ADMIN")))
+                .cookie(staffCookie("ADMIN"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {"username":"staff","password":"password123","rolesIds":[2]}
@@ -146,7 +162,7 @@ class WebSecurityConfigurationTest {
         mockMvc
             .perform(post("/users")
                 .cookie(new Cookie("XSRF-TOKEN", "test-csrf-token")).header("X-XSRF-TOKEN", "test-csrf-token")
-                .with(user("librarian").authorities(new SimpleGrantedAuthority("LIBRARIAN")))
+                .cookie(staffCookie("LIBRARIAN"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {"username":"staff","password":"password123","rolesIds":[2]}
@@ -158,7 +174,7 @@ class WebSecurityConfigurationTest {
     void createUser_missingCsrfToken_returnsForbidden() throws Exception {
         mockMvc
             .perform(post("/users")
-                .with(user("admin").authorities(new SimpleGrantedAuthority("ADMIN")))
+                .cookie(staffCookie("ADMIN"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {"username":"staff","password":"password123","rolesIds":[2]}
@@ -171,7 +187,7 @@ class WebSecurityConfigurationTest {
         mockMvc
             .perform(post("/register")
                 .cookie(new Cookie("XSRF-TOKEN", "test-csrf-token")).header("X-XSRF-TOKEN", "test-csrf-token")
-                .with(user("admin").authorities(new SimpleGrantedAuthority("ADMIN")))
+                .cookie(staffCookie("ADMIN"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {"username":"staff","password":"password123"}
@@ -184,7 +200,7 @@ class WebSecurityConfigurationTest {
         mockMvc
             .perform(post("/admins/register")
                 .cookie(new Cookie("XSRF-TOKEN", "test-csrf-token")).header("X-XSRF-TOKEN", "test-csrf-token")
-                .with(user("admin").authorities(new SimpleGrantedAuthority("ADMIN")))
+                .cookie(staffCookie("ADMIN"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {"username":"staff","password":"password123","rolesIds":[2]}
@@ -201,5 +217,15 @@ class WebSecurityConfigurationTest {
             return new JwtRequestFilter(jwtTokenUtil, jwtUserDetailsService);
         }
     }
-}
 
+    private Cookie staffCookie(final String role) {
+        final String token = role + "-token";
+        when(jwtTokenUtil.getUsernameFromToken(token)).thenReturn(role);
+        when(jwtUserDetailsService.loadUserByUsername(role))
+            .thenReturn(org.springframework.security.core.userdetails.User.withUsername(role)
+                .password("unused")
+                .authorities(role)
+                .build());
+        return new Cookie(JWT_COOKIE_NAME, token);
+    }
+}

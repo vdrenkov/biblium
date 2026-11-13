@@ -2,8 +2,10 @@ package dev.vdrenkov.biblium.configuration;
 
 import dev.vdrenkov.biblium.jwt.JwtRequestFilter;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -14,6 +16,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
+import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
+
+import java.util.function.Supplier;
 
 import static dev.vdrenkov.biblium.jwt.JwtConstants.JWT_COOKIE_NAME;
 
@@ -42,7 +51,9 @@ public class WebSecurityConfiguration {
     @Bean
     SecurityFilterChain securityFilterChain(final HttpSecurity httpSecurity) {
         httpSecurity
-            .csrf(csrf -> csrf.spa())
+            .csrf(csrf -> csrf
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .csrfTokenRequestHandler(csrfTokenRequestHandler()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(AUTH_PATH)
                 .permitAll()
@@ -73,8 +84,33 @@ public class WebSecurityConfiguration {
     }
 
     @Bean
+    public FilterRegistrationBean<JwtRequestFilter> jwtFilterRegistration() {
+        final var registration = new FilterRegistrationBean<>(jwtRequestFilter);
+        registration.setEnabled(false);
+        return registration;
+    }
+
+    @Bean
     public AuthenticationManager authenticationManager(final AuthenticationConfiguration authenticationConfiguration) {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    private static CsrfTokenRequestHandler csrfTokenRequestHandler() {
+        final var encodedTokens = new XorCsrfTokenRequestAttributeHandler();
+        final var cookieTokens = new CsrfTokenRequestAttributeHandler();
+        return new CsrfTokenRequestHandler() {
+            @Override
+            public void handle(final HttpServletRequest request, final HttpServletResponse response,
+                final Supplier<CsrfToken> csrfToken) {
+                encodedTokens.handle(request, response, csrfToken);
+            }
+
+            @Override
+            public String resolveCsrfTokenValue(final HttpServletRequest request, final CsrfToken csrfToken) {
+                final String encodedToken = encodedTokens.resolveCsrfTokenValue(request, csrfToken);
+                return encodedToken != null ? encodedToken : cookieTokens.resolveCsrfTokenValue(request, csrfToken);
+            }
+        };
     }
 }
 

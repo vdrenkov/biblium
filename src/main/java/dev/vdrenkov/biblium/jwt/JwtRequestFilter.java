@@ -5,12 +5,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import io.jsonwebtoken.JwtException;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,7 +24,7 @@ import static dev.vdrenkov.biblium.jwt.JwtConstants.JWT_COOKIE_NAME;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-    private final Logger log = LoggerFactory.getLogger(JwtRequestFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(JwtRequestFilter.class);
 
     private final JwtTokenUtil tokenUtil;
     private final JwtUserDetailsService userDetailsService;
@@ -36,33 +38,24 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(final HttpServletRequest request, final @NonNull HttpServletResponse response,
         final @NonNull FilterChain chain) throws ServletException, IOException {
         final String token = getJwtToken(request.getCookies());
-        String username = null;
-
-        try {
-            if (token != null && !token.isEmpty()) {
-                log.debug("JWT cookie detected on request");
-                username = tokenUtil.getUsernameFromToken(token);
-            }
-
-            if (SecurityContextHolder.getContext().getAuthentication() == null && username != null) {
+        if (token != null && !token.isBlank() && SecurityContextHolder.getContext().getAuthentication() == null) {
+            try {
+                final String username = tokenUtil.getUsernameFromToken(token);
                 final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                if (Boolean.TRUE.equals(tokenUtil.validateToken(token, userDetails))) {
-                    final UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-
-                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                }
+                final var authentication = UsernamePasswordAuthenticationToken.authenticated(
+                    userDetails, null, userDetails.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } catch (final JwtException | IllegalArgumentException | UsernameNotFoundException exception) {
+                log.debug("Rejected an invalid authentication cookie");
             }
-        } catch (Exception exception) {
-            log.warn("Failed authentication request from JWT cookie", exception);
         }
 
         chain.doFilter(request, response);
     }
 
     private static String getJwtToken(final Cookie[] cookies) {
+
         if (cookies != null) {
             return Arrays
                 .stream(cookies)
@@ -71,6 +64,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 .map(Cookie::getValue)
                 .orElse(null);
         }
+
         return null;
     }
 }
