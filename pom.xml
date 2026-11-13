@@ -17,6 +17,8 @@
     <properties>
         <java.version>27</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
+        <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
+        <maven.compiler.failOnWarning>true</maven.compiler.failOnWarning>
         <jjwt.version>0.13.0</jjwt.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
