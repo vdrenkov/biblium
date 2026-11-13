@@ -1,10 +1,4 @@
 package dev.vdrenkov.biblium.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
-@AllArgsConstructor
-@Data
-public class UserRoleDto {
-    private String role;
+public record UserRoleDto(int id, String role) {
 }

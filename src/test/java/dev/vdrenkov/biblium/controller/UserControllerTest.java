@@ -78,14 +78,14 @@ class UserControllerTest {
     @Test
     void testGetAllUsers_returnsOk() throws Exception {
         when(userService.getAllUsersDto()).thenReturn(
-            Collections.singletonList(new UserDto("admin", Collections.emptyList())));
+            Collections.singletonList(new UserDto(ID, "admin", Collections.emptyList())));
 
         mockMvc.perform(get("/users")).andExpect(status().isOk());
     }
 
     @Test
     void testGetUserById_returnsOk() throws Exception {
-        when(userService.getUserDtoById(anyInt())).thenReturn(new UserDto("admin", Collections.emptyList()));
+        when(userService.getUserDtoById(anyInt())).thenReturn(new UserDto(ID, "admin", Collections.emptyList()));
 
         mockMvc.perform(get("/users/" + ID)).andExpect(status().isOk());
     }
