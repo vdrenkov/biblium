@@ -8,8 +8,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +25,6 @@ import java.util.List;
 @RestController
 @Validated
 public class OrderController {
-    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
 
     private static final String URI = "/orders";
 
@@ -42,19 +39,16 @@ public class OrderController {
         final Order order = orderService.addOrder(orderRequest);
 
         final URI location = UriComponentsBuilder.fromUriString("/orders/{id}").buildAndExpand(order.getId()).toUri();
-        log.info("A new order added");
         return ResponseEntity.created(location).build();
     }
 
     @GetMapping(URI)
     public ResponseEntity<List<OrderDto>> getAllOrders() {
-        log.info("All orders requested from the database");
         return ResponseEntity.ok(orderService.getAllOrdersDto());
     }
 
     @GetMapping("/clients/{clientId}" + URI)
     public ResponseEntity<List<OrderDto>> getAllOrdersByClient(@PathVariable final int clientId) {
-        log.info("All orders with client ID {} requested from the database.", clientId);
         return ResponseEntity.ok(orderService.getAllOrdersDtoByClient(clientId));
     }
 
@@ -62,13 +56,11 @@ public class OrderController {
     public ResponseEntity<List<OrderDto>> getALlOrdersByDate(
         @RequestParam @Min(value = 1, message = "Choice must be between 1 and 6") @Max(value = 6,
             message = "Choice must be between 1 and 6") final int choice, @RequestParam final String date) {
-        log.info("All orders by date requested from the database.");
         return ResponseEntity.ok(orderService.getAllOrdersDtoByDate(choice, date));
     }
 
     @GetMapping(URI + "/{id}")
     public ResponseEntity<OrderDto> getOrderById(@PathVariable final int id) {
-        log.info("Order with an ID {} requested from the database.", id);
         return ResponseEntity.ok(orderService.getOrderDtoById(id));
     }
 
@@ -80,8 +72,6 @@ public class OrderController {
         @RequestParam(required = false) final Boolean returnOld) {
 
         final OrderDto oldOrder = orderService.extendOrderDueByDate(id, choice, period);
-
-        log.info("Order with ID {} requested to be updated.", id);
 
         if (Boolean.TRUE.equals(returnOld)) {
             return ResponseEntity.ok(oldOrder);
