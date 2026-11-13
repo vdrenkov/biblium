@@ -1,211 +1,102 @@
 # Biblium
 
-RESTful Spring Boot service for running a small library catalogue and lending workflow. The project was built for
-personal learning and portfolio purposes and showcases role-based access, DTO-driven APIs, and layered design.
+Staff-facing REST API for managing a library catalogue, clients and borrowing orders.
 
 ## Features
 
-- Manage authors and books, including filtering books by an author and tracking available quantity per title.
-- Register clients, delete them with optional payload echo, and keep contact details unique.
-- Track borrowing orders, query them by a client or date, and extend due dates in days, weeks or months.
-- API-first stateless security with Spring Security and JWT (stored as an HttpOnly cookie).
-- Dedicated admin endpoints for user and role management (ADMIN, LIBRARIAN authorities).
-- Centralized exception handling, request validation, and structured logging to `logs/log.log`.
-- Unit, slice, and MVC security tests covering controllers, services, mappers, exception handlers, and access rules.
+- Manage authors, books and client contact details.
+- Create borrowing orders, check available stock, filter loans by client or date and extend due dates.
+- Administrator-managed staff accounts with ADMIN and LIBRARIAN permissions.
+- HttpOnly JWT authentication cookies and CSRF protection.
+- Transactional stock updates, database constraints and Liquibase schema migrations.
 
-## Tech Stack
+## Stack
 
-- Java 25
-- Spring Boot 4.0.3 (Web, Data JPA, Validation, Security)
-- Spring Framework 7 / Jakarta EE (`jakarta.*` namespaces)
-- Hibernate ORM 7 & PostgreSQL
-- Liquibase for managed schema migrations
-- JSON Web Tokens via `jjwt` 0.13.0
-- Maven
-- JUnit 5, Mockito JUnit Jupiter, Spring Test, MockMvc
+Java 27, Spring Boot 4.1, Spring Security, Spring Data JPA, PostgreSQL, Liquibase and Maven 3.10.
+Tests use JUnit, Mockito, MockMvc and PostgreSQL Testcontainers.
 
-## Project Layout
+## Run locally
 
-```
-src/main/java/dev/vdrenkov/biblium/
-  configuration/        # Security filter chain & password encoder
-  controller/           # REST controllers for authors, books, clients, orders, users, roles
-  dto/                  # Response DTO records
-  entity/               # JPA entities and relationships
-  exception/, handler/  # Custom exceptions + global exception handler
-  jwt/                  # Token utilities, filter, and user details service
-  mapper/               # Manual DTO mappers (with logging)
-  repository/           # Spring Data repositories
-  request/              # Validated request payloads
-  service/              # Business logic layer
-  util/                 # Shared constants
-src/main/resources/
-  application.properties
-  db/changelog/         # Liquibase changelogs
-  Biblium.postman_collection.json
-logs/                   # Log output destination (configured in properties)
+Install Java 27 and run an existing PostgreSQL server. Create the database once:
+
+```sql
+CREATE DATABASE biblium;
 ```
 
-## Architecture
+Set the required environment variables. PowerShell example:
 
-- Layered Spring Boot service with separated controller, service, repository, mapper, and entity packages.
-- Controllers define the REST contract, validate request payloads, and translate HTTP interactions into application use cases.
-- Services contain the borrowing, catalogue, client-management, authentication, and role-management business rules.
-- Repositories isolate persistence concerns through Spring Data JPA on top of PostgreSQL.
-- Manual mappers keep DTO conversion explicit and predictable at the API boundary.
-- Spring Security provides stateless JWT cookie authentication, CSRF protection, and role-based authorization.
-- Liquibase manages schema changes, while Hibernate validates mappings at startup instead of mutating the database.
-
-## Prerequisites
-
-- Java 25
-- Maven 3.9+
-- PostgreSQL running locally (default config expects `localhost:5432/biblium`)
-- Optional: Postman for API exploration (`src/main/resources/Biblium.postman_collection.json`)
-
-## Configuration
-
-The default configuration lives in `src/main/resources/application.properties`:
-
-- `spring.datasource.*` points to a PostgreSQL instance.
-- `spring.jpa.hibernate.ddl-auto=validate` keeps Hibernate in schema-validation mode.
-- Liquibase applies the managed schema from `src/main/resources/db/changelog/db.changelog-master.yaml`.
-- `spring.jpa.open-in-view=false` disables Open Session in View for stateless API behavior.
-- Hibernate dialect auto-detected from the JDBC driver (no explicit `hibernate.dialect` override configured).
-- `jwt.secret` provides the signing key for tokens (use a strong 64+ character secret for HS512) and is required at
-  startup.
-- `jwt.cookie.secure` and `jwt.cookie.same-site` control cookie hardening options.
-- `logging.file.name=logs/log.log` routes logs to the `/logs` folder.
-- `app.bootstrap.roles=true` auto-creates `ADMIN` and `LIBRARIAN` roles if missing.
-- `app.bootstrap.admin.username` / `app.bootstrap.admin.password` optionally create an initial admin user at startup.
-
-`JWT_SECRET` and `SPRING_DATASOURCE_PASSWORD` are mandatory environment variables.
-
-Do not commit real credentials. Override sensitive values with environment variables, or a profile-specific properties
-file instead of editing source directly:
-
-```bash
-set SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/biblium
-set SPRING_DATASOURCE_USERNAME=postgres
-set SPRING_DATASOURCE_PASSWORD=<your-password>
-set JWT_SECRET=<64+-char-secret>
+```powershell
+$env:SPRING_DATASOURCE_PASSWORD = '<database-password>'
+$env:JWT_SECRET = '<random-secret-of-at-least-64-UTF-8-bytes>'
+$env:APP_BOOTSTRAP_ADMIN_USERNAME = 'admin'
+$env:APP_BOOTSTRAP_ADMIN_PASSWORD = '<strong-admin-password>'
+$env:JWT_COOKIE_SECURE = 'false'
 ```
 
-For tighter production hardening, keep:
+The default database URL is `jdbc:postgresql://localhost:5432/biblium`, with username `postgres`.
+Override these with `SPRING_DATASOURCE_URL` and `SPRING_DATASOURCE_USERNAME` when needed.
+The bootstrap credentials create the first administrator if that username does not exist;
+remove them from the environment afterwards. Existing passwords are never overwritten.
 
-- HTTPS-only cookies (`jwt.cookie.secure=true`) and restrictive `SameSite` as needed.
-
-For local HTTP development only, you can explicitly relax the cookie secure flag:
-
-```bash
-set JWT_COOKIE_SECURE=false
+```powershell
+.\mvnw.cmd spring-boot:run
 ```
 
-## Getting Started
+The API listens on `http://localhost:8080`. Liquibase applies migrations and Hibernate validates
+the schema. Keep secure cookies enabled over HTTPS; `JWT_COOKIE_SECURE=false` is for local HTTP only.
+Database credentials and signing secrets belong in the environment, not in tracked configuration.
 
-1. Create the database (first run only):
-   ```sql
-   CREATE DATABASE biblium;
-   ```
-2. Build the project:
-   ```bash
-   mvn clean package
-   ```
-3. Start the service:
-   ```bash
-   mvn spring-boot:run
-   ```
-   The API listens on `http://localhost:8080`.
+## API
 
-## Authentication & Roles
+Import [the Postman collection](Biblium.postman_collection.json), set `baseUrl`, `username` and
+`password`, then run `GetCsrfToken` and `Login`. Postman retains the authentication cookie and
+includes the CSRF header on state-changing requests. Obtain a fresh CSRF token after logout.
+Creation requests save their returned IDs for subsequent requests.
 
-- `POST /register` self-registers a LIBRARIAN user.
-- `GET /csrf` returns a CSRF token and sets the `XSRF-TOKEN` cookie for subsequent state-changing requests.
-- `POST /login` authenticates a user and issues a JWT stored in an HttpOnly cookie named `BIBLIUM_AUTH`; include it on
-  subsequent requests.
-- `POST /admins/register` lets an ADMIN create additional ADMIN or LIBRARIAN accounts without changing the caller’s
-  current session.
-- `POST /logout` clears the JWT cookie.
-- CSRF is enabled with `CookieCsrfTokenRepository`; send `X-XSRF-TOKEN` with POST/PUT/DELETE calls using the token from
-  `/csrf` (or the `XSRF-TOKEN` cookie).
-- Authorities:
-    - **ADMIN** – full access to user/role management and all catalogue operations (including deletions).
-    - **LIBRARIAN** – CRUD access to authors, books, clients and orders (except DELETE and admin endpoints).
+| Resource | Operations | Access |
+| --- | --- | --- |
+| `/csrf`, `/login` | Obtain a CSRF token; authenticate | Public |
+| `/logout` | Clear the authentication cookie | CSRF-protected |
+| `/users`, `/users/{id}` | Create and read staff accounts | ADMIN |
+| `/roles`, `/roles/{id}` | Create and read roles | ADMIN |
+| `/authors`, `/authors/{id}` | Create and read authors | ADMIN, LIBRARIAN |
+| `/books`, `/books/{id}`, `/authors/{id}/books` | Create and read available books | ADMIN, LIBRARIAN |
+| `/clients`, `/clients/{id}` | Create and read clients; delete a client | ADMIN, LIBRARIAN; deletion ADMIN only |
+| `/orders`, `/orders/{id}`, `/clients/{id}/orders` | Create and read loans; extend due dates | ADMIN, LIBRARIAN |
 
-Roles (`ADMIN`, `LIBRARIAN`) are auto-bootstrapped at startup. To bootstrap the first admin automatically, set:
+Create staff through `POST /users`. Run `GetAllRoles` to obtain the librarian role ID, then set
+`newUserPassword` before running `CreateUser`. Public registration is not available. Creating staff
+does not change the administrator's current login. User and role responses include their IDs;
+passwords are never returned.
 
-```bash
-set APP_BOOTSTRAP_ADMIN_USERNAME=admin
-set APP_BOOTSTRAP_ADMIN_PASSWORD=<strong-password>
+For state-changing requests, send `X-XSRF-TOKEN` with the token returned by `/csrf` or the value of
+the `XSRF-TOKEN` cookie, together with that cookie. Authentication uses the `BIBLIUM_AUTH` cookie.
+
+Order date filters use `GET /orders?choice=1&date=2026-11-13`: choices 1–3 select issue date
+equal/before/after; 4–6 select due date equal/before/after. Due-date extensions use
+`PUT /orders/{id}?choice=1&period=7`: choices 1–3 mean days/weeks/months. Add `returnOld=true` to
+return the previous order, or to return a deleted client from `DELETE /clients/{id}`.
+
+## Verification
+
+Run all unit and PostgreSQL integration tests, then package the application:
+
+```powershell
+.\mvnw.cmd clean verify
 ```
 
-## API Overview
+Integration tests require a running Docker-compatible engine and manage their own disposable
+PostgreSQL database. Local development uses your existing PostgreSQL server; no Compose setup is
+required. The test image is pinned by digest and scanned for known vulnerabilities.
 
-| Method | Path                                                    | Description                                                 | Access           |
-|--------|---------------------------------------------------------|-------------------------------------------------------------|------------------|
-| GET    | `/csrf`                                                 | Get CSRF token for state-changing requests                  | Public           |
-| POST   | `/login`                                                | Authenticate an existing user and receive JWT cookie        | Public           |
-| POST   | `/register`                                             | Self-register a librarian account                           | Public           |
-| POST   | `/admins/register`                                      | Register a user with roles (without changing current login) | ADMIN            |
-| POST   | `/logout`                                               | Clear JWT authentication cookie                             | Authenticated    |
-| GET    | `/authors`                                              | List authors                                                | ADMIN, LIBRARIAN |
-| POST   | `/authors`                                              | Create author                                               | ADMIN, LIBRARIAN |
-| GET    | `/authors/{id}`                                         | Get author details                                          | ADMIN, LIBRARIAN |
-| GET    | `/books`                                                | List available books                                        | ADMIN, LIBRARIAN |
-| POST   | `/books`                                                | Add book to catalogue                                       | ADMIN, LIBRARIAN |
-| GET    | `/authors/{authorId}/books`                             | Books written by author                                     | ADMIN, LIBRARIAN |
-| GET    | `/books/{id}`                                           | Get book details                                            | ADMIN, LIBRARIAN |
-| POST   | `/clients`                                              | Register client                                             | ADMIN, LIBRARIAN |
-| GET    | `/clients`                                              | List clients                                                | ADMIN, LIBRARIAN |
-| GET    | `/clients/{id}`                                         | Client details                                              | ADMIN, LIBRARIAN |
-| DELETE | `/clients/{id}?returnOld={bool}`                        | Delete client and optionally return removed payload         | ADMIN            |
-| POST   | `/orders`                                               | Create borrowing order (checks stock & decrements quantity) | ADMIN, LIBRARIAN |
-| GET    | `/orders`                                               | List orders                                                 | ADMIN, LIBRARIAN |
-| GET    | `/clients/{clientId}/orders`                            | Orders placed by client                                     | ADMIN, LIBRARIAN |
-| GET    | `/orders?choice={1-6}&date={yyyy-MM-dd}`                | Filter orders by issue/due date rule                        | ADMIN, LIBRARIAN |
-| GET    | `/orders/{id}`                                          | Get order details                                           | ADMIN, LIBRARIAN |
-| PUT    | `/orders/{id}?choice={1-3}&period={n}&returnOld={bool}` | Extend due date by days, weeks, or months                   | ADMIN, LIBRARIAN |
-| GET    | `/users`                                                | List users                                                  | ADMIN            |
-| GET    | `/users/{id}`                                           | User details                                                | ADMIN            |
-| POST   | `/roles`                                                | Create role                                                 | ADMIN            |
-| GET    | `/roles`                                                | List roles                                                  | ADMIN            |
-| GET    | `/roles/{id}`                                           | Role details                                                | ADMIN            |
+Run unit tests alone with `.\mvnw.cmd test`. On Linux and macOS, use `./mvnw`.
+GitHub Actions runs the full build and tests, then scans the packaged runtime dependencies with
+Trivy. Dependabot checks Maven dependencies and GitHub Actions weekly.
 
-`choice` query parameters drive filter/extend behaviour:
+## Limitations and acknowledgments
 
-- Orders by date: `1` issue date equals, `2` issue before, `3` issue after, `4` due equals, `5` due before, `6` due
-  after.
-- Extend due date: `1` add days, `2` add weeks, `3` add months.
-- Unsupported HTTP methods return `405 Method Not Allowed`.
+Borrowing decrements stock; a book-return workflow is not implemented. Logout clears the browser
+cookie; an already-issued JWT remains valid until its one-hour expiry. Only ADMIN and LIBRARIAN
+roles have application permissions.
 
-Import the Postman collection for ready-made requests (
-`src/main/resources/Biblium.postman_collection.json`). Run `GetCsrfToken` first, then use the returned
-token for POST/PUT/DELETE requests together with the authentication cookie.
-
-## Testing
-
-Run the automated test suite with:
-
-```bash
-mvn test
-```
-
-The suite uses JUnit 5 (Jupiter), Mockito JUnit Jupiter, and Spring’s test utilities to cover controller endpoints,
-service logic, DTO mappers, exception handling, and security access rules.
-
-## Database Migrations
-
-- Liquibase is the single source of truth for schema management.
-- The initial schema lives in `src/main/resources/db/changelog/changes/001-init-schema.sql`.
-- Hibernate validates the schema on startup instead of mutating it.
-- For the cleanest first run, point the app at a fresh `biblium` database and let Liquibase apply the schema.
-
-## Logging
-
-Application logs are written to `logs/log.log` (rotation handled by Spring Boot/Logback defaults). Adjust
-`logging.file.name` or log levels in `application.properties` as needed.
-
-## Notes
-
-This codebase is part of a private learning portfolio. Feel free to adapt it for experimentation, but it is not licensed
-for commercial redistribution.
+This is a personal portfolio project by Valentin Drenkov and is not for redistribution.

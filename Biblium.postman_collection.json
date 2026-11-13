@@ -1,0 +1,434 @@
+{
+  "info" : {
+    "_postman_id" : "2f5847e7-1102-4edd-8c07-916f611baafc",
+    "name" : "Biblium",
+    "schema" : "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id" : "23937291"
+  },
+  "item" : [ {
+    "name" : "UserManagement",
+    "item" : [ {
+      "name" : "Login",
+      "request" : {
+        "method" : "POST",
+        "header" : [ {
+          "key" : "X-XSRF-TOKEN",
+          "value" : "{{xsrf-token}}"
+        } ],
+        "body" : {
+          "mode" : "raw",
+          "raw" : "{\"username\":\"{{username}}\",\"password\":\"{{password}}\"}",
+          "options" : {
+            "raw" : {
+              "language" : "json"
+            }
+          }
+        },
+        "url" : "{{baseUrl}}/login"
+      },
+      "response" : [ ]
+    }, {
+      "name" : "Logout",
+      "event" : [ {
+        "listen" : "test",
+        "script" : {
+          "exec" : [ "pm.collectionVariables.unset('xsrf-token');" ],
+          "type" : "text/javascript"
+        }
+      } ],
+      "request" : {
+        "method" : "POST",
+        "header" : [ {
+          "key" : "X-XSRF-TOKEN",
+          "value" : "{{xsrf-token}}"
+        } ],
+        "url" : "{{baseUrl}}/logout"
+      },
+      "response" : [ ]
+    }, {
+      "name" : "CreateUser",
+      "request" : {
+        "method" : "POST",
+        "body" : {
+          "mode" : "raw",
+          "raw" : "{\"username\":\"new_librarian\",\"password\":\"{{newUserPassword}}\",\"rolesIds\":[{{librarianRoleId}}]}",
+          "options" : {
+            "raw" : {
+              "language" : "json"
+            }
+          }
+        },
+        "url" : "{{baseUrl}}/users",
+        "header" : [ {
+          "key" : "X-XSRF-TOKEN",
+          "value" : "{{xsrf-token}}"
+        } ]
+      },
+      "response" : [ ],
+      "event" : [ {
+        "listen" : "test",
+        "script" : {
+          "type" : "text/javascript",
+          "exec" : [ "if (pm.response.code === 201) { pm.collectionVariables.set('userId', pm.response.headers.get('Location').split('/').pop()); }" ]
+        }
+      } ]
+    }, {
+      "name" : "GetAllUsers",
+      "request" : {
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/users"
+      },
+      "response" : [ ]
+    }, {
+      "name" : "GetUserById",
+      "request" : {
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/users/{{userId}}"
+      },
+      "response" : [ ]
+    }, {
+      "name" : "GetCsrfToken",
+      "request" : {
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/csrf"
+      },
+      "response" : [ ],
+      "event" : [ {
+        "listen" : "test",
+        "script" : {
+          "type" : "text/javascript",
+          "exec" : [ "pm.collectionVariables.set('xsrf-token', pm.response.json().token);" ]
+        }
+      } ]
+    } ]
+  }, {
+    "name" : "UserRoleManagement",
+    "item" : [ {
+      "name" : "AddNewRole",
+      "request" : {
+        "method" : "POST",
+        "body" : {
+          "mode" : "raw",
+          "raw" : "{\"role\":\"ARCHIVIST\"}",
+          "options" : {
+            "raw" : {
+              "language" : "json"
+            }
+          }
+        },
+        "url" : "{{baseUrl}}/roles",
+        "header" : [ {
+          "key" : "X-XSRF-TOKEN",
+          "value" : "{{xsrf-token}}"
+        } ]
+      },
+      "response" : [ ],
+      "event" : [ {
+        "listen" : "test",
+        "script" : {
+          "type" : "text/javascript",
+          "exec" : [ "if (pm.response.code === 201) { pm.collectionVariables.set('roleId', pm.response.headers.get('Location').split('/').pop()); }" ]
+        }
+      } ]
+    }, {
+      "name" : "GetAllRoles",
+      "request" : {
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/roles"
+      },
+      "response" : [ ],
+      "event" : [ {
+        "listen" : "test",
+        "script" : {
+          "type" : "text/javascript",
+          "exec" : [ "for (const role of pm.response.json()) { if (role.role === 'LIBRARIAN') pm.collectionVariables.set('librarianRoleId', role.id); }" ]
+        }
+      } ]
+    }, {
+      "name" : "GetRoleById",
+      "request" : {
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/roles/{{roleId}}"
+      },
+      "response" : [ ]
+    } ]
+  }, {
+    "name" : "AuthorManagement",
+    "item" : [ {
+      "name" : "AddNewAuthor",
+      "request" : {
+        "method" : "POST",
+        "body" : {
+          "mode" : "raw",
+          "raw" : "{\"name\":\"Robert\",\"surname\":\"Martin\"}",
+          "options" : {
+            "raw" : {
+              "language" : "json"
+            }
+          }
+        },
+        "url" : "{{baseUrl}}/authors",
+        "header" : [ {
+          "key" : "X-XSRF-TOKEN",
+          "value" : "{{xsrf-token}}"
+        } ]
+      },
+      "response" : [ ],
+      "event" : [ {
+        "listen" : "test",
+        "script" : {
+          "type" : "text/javascript",
+          "exec" : [ "if (pm.response.code === 201) { pm.collectionVariables.set('authorId', pm.response.headers.get('Location').split('/').pop()); }" ]
+        }
+      } ]
+    }, {
+      "name" : "GetAllAuthors",
+      "request" : {
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/authors"
+      },
+      "response" : [ ]
+    }, {
+      "name" : "GetAuthorById",
+      "request" : {
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/authors/{{authorId}}"
+      },
+      "response" : [ ]
+    } ]
+  }, {
+    "name" : "BookManagement",
+    "item" : [ {
+      "name" : "AddNewBook",
+      "request" : {
+        "method" : "POST",
+        "body" : {
+          "mode" : "raw",
+          "raw" : "{\"name\":\"Clean Code\",\"publishDate\":\"2008-08-01\",\"authorId\":{{authorId}},\"quantity\":3}",
+          "options" : {
+            "raw" : {
+              "language" : "json"
+            }
+          }
+        },
+        "url" : "{{baseUrl}}/books",
+        "header" : [ {
+          "key" : "X-XSRF-TOKEN",
+          "value" : "{{xsrf-token}}"
+        } ]
+      },
+      "response" : [ ],
+      "event" : [ {
+        "listen" : "test",
+        "script" : {
+          "type" : "text/javascript",
+          "exec" : [ "if (pm.response.code === 201) { pm.collectionVariables.set('bookId', pm.response.headers.get('Location').split('/').pop()); }" ]
+        }
+      } ]
+    }, {
+      "name" : "GetAllBooks",
+      "request" : {
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/books"
+      },
+      "response" : [ ]
+    }, {
+      "name" : "GetAllBooksByAuthor",
+      "request" : {
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/authors/{{authorId}}/books"
+      },
+      "response" : [ ]
+    }, {
+      "name" : "GetBookById",
+      "request" : {
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/books/{{bookId}}"
+      },
+      "response" : [ ]
+    } ]
+  }, {
+    "name" : "ClientController",
+    "item" : [ {
+      "name" : "AddNewClient",
+      "request" : {
+        "method" : "POST",
+        "body" : {
+          "mode" : "raw",
+          "raw" : "{\"name\":\"Jane\",\"surname\":\"Doe\",\"phoneNumber\":\"0888123456\",\"email\":\"jane.doe@example.test\"}",
+          "options" : {
+            "raw" : {
+              "language" : "json"
+            }
+          }
+        },
+        "url" : "{{baseUrl}}/clients",
+        "header" : [ {
+          "key" : "X-XSRF-TOKEN",
+          "value" : "{{xsrf-token}}"
+        } ]
+      },
+      "response" : [ ],
+      "event" : [ {
+        "listen" : "test",
+        "script" : {
+          "type" : "text/javascript",
+          "exec" : [ "if (pm.response.code === 201) { pm.collectionVariables.set('clientId', pm.response.headers.get('Location').split('/').pop()); }" ]
+        }
+      } ]
+    }, {
+      "name" : "GetAllClients",
+      "request" : {
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/clients"
+      },
+      "response" : [ ]
+    }, {
+      "name" : "GetClientById",
+      "request" : {
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/clients/{{clientId}}"
+      },
+      "response" : [ ]
+    }, {
+      "name" : "DeleteClient",
+      "request" : {
+        "method" : "DELETE",
+        "url" : "{{baseUrl}}/clients/{{clientId}}",
+        "header" : [ {
+          "key" : "X-XSRF-TOKEN",
+          "value" : "{{xsrf-token}}"
+        } ]
+      },
+      "response" : [ ]
+    } ]
+  }, {
+    "name" : "OrderManagement",
+    "item" : [ {
+      "name" : "AddNewOrder",
+      "request" : {
+        "method" : "POST",
+        "body" : {
+          "mode" : "raw",
+          "raw" : "{\"clientId\":{{clientId}},\"booksIds\":[{{bookId}}]}",
+          "options" : {
+            "raw" : {
+              "language" : "json"
+            }
+          }
+        },
+        "url" : "{{baseUrl}}/orders",
+        "header" : [ {
+          "key" : "X-XSRF-TOKEN",
+          "value" : "{{xsrf-token}}"
+        } ]
+      },
+      "response" : [ ],
+      "event" : [ {
+        "listen" : "test",
+        "script" : {
+          "type" : "text/javascript",
+          "exec" : [ "if (pm.response.code === 201) { pm.collectionVariables.set('orderId', pm.response.headers.get('Location').split('/').pop()); }" ]
+        }
+      } ]
+    }, {
+      "name" : "GetAllOrders",
+      "request" : {
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/orders"
+      },
+      "response" : [ ]
+    }, {
+      "name" : "GetAllOrdersByClient",
+      "request" : {
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/clients/{{clientId}}/orders"
+      },
+      "response" : [ ]
+    }, {
+      "name" : "GetAllOrdersByDate",
+      "request" : {
+        "auth" : {
+          "type" : "noauth"
+        },
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/orders?choice=3&date=2023-04-23"
+      },
+      "response" : [ ]
+    }, {
+      "name" : "GetOrderById",
+      "request" : {
+        "auth" : {
+          "type" : "noauth"
+        },
+        "method" : "GET",
+        "header" : [ ],
+        "url" : "{{baseUrl}}/orders/{{orderId}}"
+      },
+      "response" : [ ]
+    }, {
+      "name" : "ExtendOrderDue",
+      "request" : {
+        "method" : "PUT",
+        "url" : "{{baseUrl}}/orders/{{orderId}}?choice=1&period=1&returnOld=true",
+        "header" : [ {
+          "key" : "X-XSRF-TOKEN",
+          "value" : "{{xsrf-token}}"
+        } ]
+      },
+      "response" : [ ]
+    } ]
+  } ],
+  "variable" : [ {
+    "key" : "baseUrl",
+    "value" : "http://localhost:8080"
+  }, {
+    "key" : "username",
+    "value" : "admin"
+  }, {
+    "key" : "password",
+    "value" : ""
+  }, {
+    "key" : "newUserPassword",
+    "value" : ""
+  }, {
+    "key" : "xsrf-token",
+    "value" : ""
+  }, {
+    "key" : "librarianRoleId",
+    "value" : ""
+  }, {
+    "key" : "userId",
+    "value" : ""
+  }, {
+    "key" : "roleId",
+    "value" : ""
+  }, {
+    "key" : "authorId",
+    "value" : ""
+  }, {
+    "key" : "bookId",
+    "value" : ""
+  }, {
+    "key" : "clientId",
+    "value" : ""
+  }, {
+    "key" : "orderId",
+    "value" : ""
+  } ]
+}
