@@ -1,14 +1,17 @@
 package dev.vdrenkov.biblium.configuration;
 
+import jakarta.servlet.http.Cookie;
 import dev.vdrenkov.biblium.controller.AuthorController;
 import dev.vdrenkov.biblium.controller.ClientController;
 import dev.vdrenkov.biblium.controller.CsrfController;
 import dev.vdrenkov.biblium.controller.UserController;
 import dev.vdrenkov.biblium.dto.ClientDto;
+import dev.vdrenkov.biblium.entity.User;
 import dev.vdrenkov.biblium.jwt.JwtRequestFilter;
 import dev.vdrenkov.biblium.jwt.JwtTokenUtil;
 import dev.vdrenkov.biblium.jwt.JwtUserDetailsService;
 import dev.vdrenkov.biblium.request.UserRequest;
+import dev.vdrenkov.biblium.request.CreateUserRequest;
 import dev.vdrenkov.biblium.service.AuthorService;
 import dev.vdrenkov.biblium.service.ClientService;
 import dev.vdrenkov.biblium.service.UserService;
@@ -32,12 +35,12 @@ import static dev.vdrenkov.biblium.jwt.JwtConstants.JWT_COOKIE_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -75,7 +78,7 @@ class WebSecurityConfigurationTest {
         final String json = objectMapper.writeValueAsString(new UserRequest("librarian", "password123"));
 
         mockMvc
-            .perform(post("/login").with(csrf()).contentType(MediaType.APPLICATION_JSON).content(json))
+            .perform(post("/login").cookie(new Cookie("XSRF-TOKEN", "test-csrf-token")).header("X-XSRF-TOKEN", "test-csrf-token").contentType(MediaType.APPLICATION_JSON).content(json))
             .andExpect(status().isOk());
     }
 
@@ -106,7 +109,7 @@ class WebSecurityConfigurationTest {
     void testDeleteClient_withLibrarian_forbidden() throws Exception {
         mockMvc
             .perform(delete("/clients/1")
-                .with(csrf())
+                .cookie(new Cookie("XSRF-TOKEN", "test-csrf-token")).header("X-XSRF-TOKEN", "test-csrf-token")
                 .with(user("librarian").authorities(new SimpleGrantedAuthority("LIBRARIAN"))))
             .andExpect(status().isForbidden());
     }
@@ -117,8 +120,76 @@ class WebSecurityConfigurationTest {
 
         mockMvc
             .perform(
-                delete("/clients/1").with(csrf()).with(user("admin").authorities(new SimpleGrantedAuthority("ADMIN"))))
+                delete("/clients/1").cookie(new Cookie("XSRF-TOKEN", "test-csrf-token")).header("X-XSRF-TOKEN", "test-csrf-token").with(user("admin").authorities(new SimpleGrantedAuthority("ADMIN"))))
             .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void createUser_administrator_returnsCreatedWithoutChangingSession() throws Exception {
+        when(userService.createUser(any(CreateUserRequest.class))).thenReturn(new User(7, "staff", "encoded", null));
+
+        mockMvc
+            .perform(post("/users")
+                .cookie(new Cookie("XSRF-TOKEN", "test-csrf-token")).header("X-XSRF-TOKEN", "test-csrf-token")
+                .with(user("admin").authorities(new SimpleGrantedAuthority("ADMIN")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"username":"staff","password":"password123","rolesIds":[2]}
+                    """))
+            .andExpect(status().isCreated())
+            .andExpect(header().string("Location", "/users/7"))
+            .andExpect(cookie().doesNotExist(JWT_COOKIE_NAME));
+    }
+
+    @Test
+    void createUser_librarian_returnsForbidden() throws Exception {
+        mockMvc
+            .perform(post("/users")
+                .cookie(new Cookie("XSRF-TOKEN", "test-csrf-token")).header("X-XSRF-TOKEN", "test-csrf-token")
+                .with(user("librarian").authorities(new SimpleGrantedAuthority("LIBRARIAN")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"username":"staff","password":"password123","rolesIds":[2]}
+                    """))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void createUser_missingCsrfToken_returnsForbidden() throws Exception {
+        mockMvc
+            .perform(post("/users")
+                .with(user("admin").authorities(new SimpleGrantedAuthority("ADMIN")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"username":"staff","password":"password123","rolesIds":[2]}
+                    """))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void register_legacyPublicRoute_isUnavailable() throws Exception {
+        mockMvc
+            .perform(post("/register")
+                .cookie(new Cookie("XSRF-TOKEN", "test-csrf-token")).header("X-XSRF-TOKEN", "test-csrf-token")
+                .with(user("admin").authorities(new SimpleGrantedAuthority("ADMIN")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"username":"staff","password":"password123"}
+                    """))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void registerAdmin_legacyRoute_isUnavailable() throws Exception {
+        mockMvc
+            .perform(post("/admins/register")
+                .cookie(new Cookie("XSRF-TOKEN", "test-csrf-token")).header("X-XSRF-TOKEN", "test-csrf-token")
+                .with(user("admin").authorities(new SimpleGrantedAuthority("ADMIN")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"username":"staff","password":"password123","rolesIds":[2]}
+                    """))
+            .andExpect(status().isNotFound());
     }
 
     @TestConfiguration

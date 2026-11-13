@@ -14,23 +14,19 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import static dev.vdrenkov.biblium.jwt.JwtConstants.JWT_COOKIE_NAME;
 
-/**
- * WebSecurityConfiguration component.
- */
 @EnableWebSecurity
 @Configuration
 public class WebSecurityConfiguration {
     private static final String ADMIN = "ADMIN";
     private static final String LIBRARIAN = "LIBRARIAN";
 
-    private static final String[] AUTH_PATH = { "/csrf", "/login", "/register"
+    private static final String[] AUTH_PATH = { "/csrf", "/login"
     };
 
-    private static final String[] ADMIN_LIST = { "/admins/**", "/users", "/users/**", "/roles", "/roles/**",
+    private static final String[] ADMIN_LIST = { "/users", "/users/**", "/roles", "/roles/**",
     };
 
     private static final String[] LIBRARIAN_LIST = { "/authors", "/authors/**", "/books", "/books/**", "/clients",
@@ -39,12 +35,6 @@ public class WebSecurityConfiguration {
 
     private final JwtRequestFilter jwtRequestFilter;
 
-    /**
-     * Handles WebSecurityConfiguration operation.
-     *
-     * @param jwtRequestFilter
-     *     The JWT request filter. Will not be null.
-     */
     public WebSecurityConfiguration(final JwtRequestFilter jwtRequestFilter) {
         this.jwtRequestFilter = jwtRequestFilter;
     }
@@ -52,7 +42,7 @@ public class WebSecurityConfiguration {
     @Bean
     SecurityFilterChain securityFilterChain(final HttpSecurity httpSecurity) {
         httpSecurity
-            .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+            .csrf(csrf -> csrf.spa())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(AUTH_PATH)
                 .permitAll()
@@ -77,23 +67,11 @@ public class WebSecurityConfiguration {
         return httpSecurity.build();
     }
 
-    /**
-     * Handles passwordEncoder operation.
-     *
-     * @return The newly instantiated password encoder.
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Handles authenticationManager operation.
-     *
-     * @param authenticationConfiguration
-     *     The authentication configuration. Will not be null.
-     * @return The newly instantiated authentication manager.
-     */
     @Bean
     public AuthenticationManager authenticationManager(final AuthenticationConfiguration authenticationConfiguration) {
         return authenticationConfiguration.getAuthenticationManager();

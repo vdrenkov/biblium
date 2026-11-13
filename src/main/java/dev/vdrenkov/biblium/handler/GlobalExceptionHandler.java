@@ -25,24 +25,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.format.DateTimeParseException;
 
-/**
- * GlobalExceptionHandler component.
- */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final String CAUGHT_EXCEPTION = "Caught exception: ";
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    /**
-     * Handles handleMethodArgumentNotValidException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleMethodArgumentNotValidException(
         final MethodArgumentNotValidException exception) {
@@ -58,13 +49,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Handles handleUnexpectedTypeException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(UnexpectedTypeException.class)
     public ResponseEntity<String> handleUnexpectedTypeException(final UnexpectedTypeException exception) {
         log.warn(CAUGHT_EXCEPTION, exception);
@@ -72,13 +56,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Handles handleHttpMessageNotReadableException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<String> handleHttpMessageNotReadableException(
         final HttpMessageNotReadableException exception) {
@@ -87,13 +64,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Handles handleHttpRequestMethodNotSupportedException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<String> handleHttpRequestMethodNotSupportedException(
         final HttpRequestMethodNotSupportedException exception) {
@@ -102,13 +72,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    /**
-     * Handles handleIllegalArgumentException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgumentException(final IllegalArgumentException exception) {
         log.warn(CAUGHT_EXCEPTION, exception);
@@ -116,13 +79,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Handles handleMissingServletRequestParameterException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<String> handleMissingServletRequestParameterException(
         final MissingServletRequestParameterException exception) {
@@ -131,13 +87,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Handles handleDateTimeParseException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(DateTimeParseException.class)
     public ResponseEntity<String> handleDateTimeParseException(final DateTimeParseException exception) {
         log.warn(CAUGHT_EXCEPTION, exception);
@@ -145,13 +94,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Handles handleMethodArgumentTypeMismatchException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<String> handleMethodArgumentTypeMismatchException(
         final MethodArgumentTypeMismatchException exception) {
@@ -160,26 +102,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Handles handleConstraintViolationException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<String> handleConstraintViolationException(final ConstraintViolationException exception) {
         log.warn(CAUGHT_EXCEPTION, exception);
         return new ResponseEntity<>("Request validation failed", HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Handles handleHandlerMethodValidationException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(HandlerMethodValidationException.class)
     public ResponseEntity<String> handleHandlerMethodValidationException(
         final HandlerMethodValidationException exception) {
@@ -187,13 +115,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>("Request validation failed", HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Handles handleInternalAuthenticationServiceException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(InternalAuthenticationServiceException.class)
     public ResponseEntity<String> handleInternalAuthenticationServiceException(
         final InternalAuthenticationServiceException exception) {
@@ -201,26 +122,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED);
     }
 
-    /**
-     * Handles handleBadCredentialsException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<String> handleBadCredentialsException(final BadCredentialsException exception) {
         log.warn(CAUGHT_EXCEPTION, exception);
         return new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED);
     }
 
-    /**
-     * Handles handleDataIntegrityViolationException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolationException(
         final DataIntegrityViolationException exception) {
@@ -229,91 +136,47 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Handles handleAuthorNotFoundException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(AuthorNotFoundException.class)
     public ResponseEntity<String> handleAuthorNotFoundException(final AuthorNotFoundException exception) {
         log.warn(CAUGHT_EXCEPTION, exception);
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    /**
-     * Handles handleBookNotFoundException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(BookNotFoundException.class)
     public ResponseEntity<String> handleBookNotFoundException(final BookNotFoundException exception) {
         log.warn(CAUGHT_EXCEPTION, exception);
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    /**
-     * Handles handleClientNotFoundException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(ClientNotFoundException.class)
     public ResponseEntity<String> handleClientNotFoundException(final ClientNotFoundException exception) {
         log.warn(CAUGHT_EXCEPTION, exception);
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    /**
-     * Handles handleOrderNotFoundException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(OrderNotFoundException.class)
     public ResponseEntity<String> handleOrderNotFoundException(final OrderNotFoundException exception) {
         log.warn(CAUGHT_EXCEPTION, exception);
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    /**
-     * Handles handleUserNotFoundException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<String> handleUserNotFoundException(final UserNotFoundException exception) {
         log.warn(CAUGHT_EXCEPTION, exception);
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    /**
-     * Handles handleUserRoleNotFoundException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
     @ExceptionHandler(UserRoleNotFoundException.class)
     public ResponseEntity<String> handleUserRoleNotFoundException(final UserRoleNotFoundException exception) {
         log.warn(CAUGHT_EXCEPTION, exception);
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    /**
-     * Handles handleException operation.
-     *
-     * @param exception
-     *     Raised exception instance.
-     * @return Response entity containing the operation result.
-     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<String> handleNoResourceFoundException(final NoResourceFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Resource not found");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(final Exception exception) {
         log.error(CAUGHT_EXCEPTION, exception);

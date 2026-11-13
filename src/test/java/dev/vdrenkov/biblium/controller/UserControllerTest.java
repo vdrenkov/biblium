@@ -3,7 +3,7 @@ package dev.vdrenkov.biblium.controller;
 import dev.vdrenkov.biblium.dto.UserDto;
 import dev.vdrenkov.biblium.entity.User;
 import dev.vdrenkov.biblium.handler.GlobalExceptionHandler;
-import dev.vdrenkov.biblium.request.AdminRequest;
+import dev.vdrenkov.biblium.request.CreateUserRequest;
 import dev.vdrenkov.biblium.request.UserRequest;
 import dev.vdrenkov.biblium.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,25 +63,14 @@ class UserControllerTest {
     }
 
     @Test
-    void testRegister_returnsCreatedAndCookie() throws Exception {
-        final HttpCookie cookie = ResponseCookie.from(JWT_COOKIE_NAME, "jwt-token").httpOnly(true).path("/").build();
-        when(userService.registerUser(any(UserRequest.class))).thenReturn(cookie);
-        final String json = new ObjectMapper().writeValueAsString(new UserRequest("librarian", "password123"));
-
-        mockMvc
-            .perform(post("/register").contentType(MediaType.APPLICATION_JSON).content(json))
-            .andExpect(status().isCreated());
-    }
-
-    @Test
-    void testRegisterAdmin_returnsCreatedAndLocation() throws Exception {
-        when(userService.registerByAdmin(any(AdminRequest.class))).thenReturn(new User(1, "admin", "encoded", null));
+    void createUser_validStaffAccount_returnsCreatedAndLocation() throws Exception {
+        when(userService.createUser(any(CreateUserRequest.class))).thenReturn(new User(1, "admin", "encoded", null));
         final String json = """
             {"username":"admin","password":"password123","rolesIds":[1]}
             """;
 
         mockMvc
-            .perform(post("/admins/register").contentType(MediaType.APPLICATION_JSON).content(json))
+            .perform(post("/users").contentType(MediaType.APPLICATION_JSON).content(json))
             .andExpect(status().isCreated())
             .andExpect(header().string("Location", "/users/1"));
     }
