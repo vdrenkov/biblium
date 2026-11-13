@@ -10,3 +10,10 @@ databaseChangeLog:
             relativeToChangelogFile: false
             splitStatements: true
             stripComments: false
+  - changeSet:
+      id: 002-enforce-data-integrity
+      author: vdrenkov
+      changes:
+        - sqlFile:
+            path: db/changelog/changes/002-enforce-data-integrity.sql
+            relativeToChangelogFile: false
