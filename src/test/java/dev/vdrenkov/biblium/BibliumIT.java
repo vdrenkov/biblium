@@ -96,8 +96,10 @@ class BibliumIT {
     private int serverPort;
 
     @Test
-    void server_realHttpRequest_returnsCsrfTokenAndCookie() throws Exception {
-        try (final var client = java.net.http.HttpClient.newHttpClient()) {
+    void server_cookieBasedAuthentication_preservesCsrfAcrossRequests() throws Exception {
+        try (final var client = java.net.http.HttpClient.newBuilder()
+            .cookieHandler(new java.net.CookieManager(null, java.net.CookiePolicy.ACCEPT_ALL))
+            .build()) {
             final var request = java.net.http.HttpRequest.newBuilder(
                 java.net.URI.create("http://localhost:" + serverPort + "/csrf")).build();
             final var response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
@@ -105,6 +107,24 @@ class BibliumIT {
             assertEquals(200, response.statusCode());
             assertTrue(objectMapper.readTree(response.body()).hasNonNull("token"));
             assertTrue(response.headers().allValues("Set-Cookie").stream().anyMatch(header -> header.startsWith("XSRF-TOKEN=")));
+            final String token = objectMapper.readTree(response.body()).path("token").asString();
+            final var login = java.net.http.HttpRequest.newBuilder(java.net.URI.create("http://localhost:" + serverPort + "/login"))
+                .header("Content-Type", "application/json")
+                .header("X-XSRF-TOKEN", token)
+                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(
+                    new UserRequest("integration_admin", PASSWORD))))
+                .build();
+            assertEquals(200, client.send(login, java.net.http.HttpResponse.BodyHandlers.ofString()).statusCode());
+            for (final String name : List.of("First", "Second")) {
+                final String surname = "Author" + UUID.randomUUID().toString().replaceAll("[^a-f]", "");
+                final var author = java.net.http.HttpRequest.newBuilder(java.net.URI.create("http://localhost:" + serverPort + "/authors"))
+                    .header("Content-Type", "application/json")
+                    .header("X-XSRF-TOKEN", token)
+                    .POST(java.net.http.HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(
+                        new AuthorRequest(name, surname))))
+                    .build();
+                assertEquals(201, client.send(author, java.net.http.HttpResponse.BodyHandlers.ofString()).statusCode());
+            }
         }
     }
 
