@@ -7,7 +7,6 @@ import dev.vdrenkov.biblium.service.BookService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,9 +18,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
-/**
- * BookController component.
- */
 @RestController
 public class BookController {
     private static final Logger log = LoggerFactory.getLogger(BookController.class);
@@ -30,24 +26,10 @@ public class BookController {
 
     private final BookService bookService;
 
-    /**
-     * Handles BookController operation.
-     *
-     * @param bookService
-     *     Service dependency used by this component.
-     */
-    @Autowired
     public BookController(final BookService bookService) {
         this.bookService = bookService;
     }
 
-    /**
-     * Handles addBook operation.
-     *
-     * @param bookRequest
-     *     Request payload with input data.
-     * @return Response entity containing the operation result.
-     */
     @PostMapping(URI)
     public ResponseEntity<Void> addBook(@RequestBody @Valid final BookRequest bookRequest) {
         final Book book = bookService.addBook(bookRequest);
@@ -57,37 +39,18 @@ public class BookController {
         return ResponseEntity.created(location).build();
     }
 
-    /**
-     * Handles getAllAvailableBooks operation.
-     *
-     * @return Response entity containing the requested data.
-     */
     @GetMapping(URI)
     public ResponseEntity<List<BookDto>> getAllAvailableBooks() {
         log.info("All available books requested from the database");
         return ResponseEntity.ok(bookService.getAllAvailableBooksDto());
     }
 
-    /**
-     * Handles getAllBooksByAuthor operation.
-     *
-     * @param authorId
-     *     Identifier of the target entity.
-     * @return Response entity containing the requested data.
-     */
     @GetMapping("/authors/{authorId}" + URI)
     public ResponseEntity<List<BookDto>> getAllBooksByAuthor(@PathVariable final int authorId) {
         log.info("All books with author ID {} requested from the database.", authorId);
         return ResponseEntity.ok(bookService.getAllBooksDtoByAuthor(authorId));
     }
 
-    /**
-     * Handles getBookById operation.
-     *
-     * @param id
-     *     Identifier of the target entity.
-     * @return Response entity containing the requested data.
-     */
     @GetMapping(URI + "/{id}")
     public ResponseEntity<BookDto> getBookById(@PathVariable final int id) {
         log.info("Book with an ID {} requested from the database.", id);

@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,9 +20,6 @@ import java.util.Arrays;
 
 import static dev.vdrenkov.biblium.jwt.JwtConstants.JWT_COOKIE_NAME;
 
-/**
- * JwtRequestFilter component.
- */
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
     private final Logger log = LoggerFactory.getLogger(JwtRequestFilter.class);
@@ -31,30 +27,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final JwtTokenUtil tokenUtil;
     private final JwtUserDetailsService userDetailsService;
 
-    /**
-     * Handles JwtRequestFilter operation.
-     *
-     * @param tokenUtil
-     *     JWT token utility dependency.
-     * @param userDetailsService
-     *     Service dependency used by this component.
-     */
-    @Autowired
     public JwtRequestFilter(final JwtTokenUtil tokenUtil, final JwtUserDetailsService userDetailsService) {
         this.tokenUtil = tokenUtil;
         this.userDetailsService = userDetailsService;
     }
 
-    /**
-     * Handles doFilterInternal operation.
-     *
-     * @param request
-     *     Request payload with input data.
-     * @param response
-     *     HTTP servlet response.
-     * @param chain
-     *     Filter chain for request processing.
-     */
     @Override
     protected void doFilterInternal(final HttpServletRequest request, final @NonNull HttpServletResponse response,
         final @NonNull FilterChain chain) throws ServletException, IOException {
@@ -85,13 +62,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    /**
-     * Handles getJwtToken operation.
-     *
-     * @param cookies
-     *     Request cookies.
-     * @return JWT token value.
-     */
     private static String getJwtToken(final Cookie[] cookies) {
         if (cookies != null) {
             return Arrays

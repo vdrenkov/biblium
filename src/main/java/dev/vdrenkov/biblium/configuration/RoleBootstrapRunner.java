@@ -16,9 +16,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 
-/**
- * RoleBootstrapRunner component.
- */
 @Component
 public class RoleBootstrapRunner implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(RoleBootstrapRunner.class);
@@ -32,22 +29,6 @@ public class RoleBootstrapRunner implements CommandLineRunner {
     private final String bootstrapAdminUsername;
     private final String bootstrapAdminPassword;
 
-    /**
-     * Creates a role bootstrap runner with repositories, password encoder, and bootstrap settings.
-     *
-     * @param userRoleRepository
-     *     Repository used to read/create user roles.
-     * @param userRepository
-     *     Repository used to read/create users.
-     * @param passwordEncoder
-     *     Password encoder used for bootstrapped admin credentials.
-     * @param bootstrapRoles
-     *     Flag controlling whether role bootstrap runs at startup.
-     * @param bootstrapAdminUsername
-     *     Optional initial admin username.
-     * @param bootstrapAdminPassword
-     *     Optional initial admin password.
-     */
     public RoleBootstrapRunner(final UserRoleRepository userRoleRepository, final UserRepository userRepository,
         final PasswordEncoder passwordEncoder, @Value("${app.bootstrap.roles:true}") final boolean bootstrapRoles,
         @Value("${app.bootstrap.admin.username:}") final String bootstrapAdminUsername,
@@ -60,12 +41,6 @@ public class RoleBootstrapRunner implements CommandLineRunner {
         this.bootstrapAdminPassword = bootstrapAdminPassword;
     }
 
-    /**
-     * Handles run operation.
-     *
-     * @param args
-     *     Command-line arguments.
-     */
     @Override
     @Transactional
     public void run(final String @NonNull ... args) {
@@ -79,12 +54,6 @@ public class RoleBootstrapRunner implements CommandLineRunner {
         bootstrapAdminUserIfConfigured();
     }
 
-    /**
-     * Handles ensureRoleExists operation.
-     *
-     * @param roleName
-     *     Role name value.
-     */
     private void ensureRoleExists(final String roleName) {
         if (!userRoleRepository.existsByRole(roleName)) {
             userRoleRepository.save(new UserRole(roleName));
@@ -92,9 +61,6 @@ public class RoleBootstrapRunner implements CommandLineRunner {
         }
     }
 
-    /**
-     * Handles bootstrapAdminUserIfConfigured operation.
-     */
     private void bootstrapAdminUserIfConfigured() {
         if (!StringUtils.hasText(bootstrapAdminUsername) || !StringUtils.hasText(bootstrapAdminPassword)) {
             return;

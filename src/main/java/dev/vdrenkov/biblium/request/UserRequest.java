@@ -5,9 +5,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-/**
- * UserRequest component.
- */
 @AllArgsConstructor
 @Getter
 public class UserRequest {

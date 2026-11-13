@@ -9,9 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * OrderRequest component.
- */
 @AllArgsConstructor
 @NoArgsConstructor
 @Data

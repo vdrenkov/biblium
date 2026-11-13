@@ -5,9 +5,6 @@ import lombok.Data;
 
 import java.util.List;
 
-/**
- * UserDto component.
- */
 @AllArgsConstructor
 @Data
 public class UserDto {

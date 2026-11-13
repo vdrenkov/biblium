@@ -10,9 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * UserRole component.
- */
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -28,12 +25,6 @@ public class UserRole {
     @Column(name = "role", unique = true)
     private String role;
 
-    /**
-     * Handles UserRole operation.
-     *
-     * @param role
-     *     Role value.
-     */
     public UserRole(final String role) {
         this.role = role;
     }

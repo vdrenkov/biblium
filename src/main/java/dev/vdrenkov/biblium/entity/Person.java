@@ -9,9 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * Person component.
- */
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -29,14 +26,6 @@ public class Person {
     @Column(name = "surname")
     protected String surname;
 
-    /**
-     * Handles Person operation.
-     *
-     * @param name
-     *     Name value.
-     * @param surname
-     *     Surname value.
-     */
     public Person(String name, String surname) {
         this.name = name;
         this.surname = surname;

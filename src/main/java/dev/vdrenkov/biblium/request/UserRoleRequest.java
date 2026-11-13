@@ -6,9 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * UserRoleRequest component.
- */
 @AllArgsConstructor
 @NoArgsConstructor
 @Data

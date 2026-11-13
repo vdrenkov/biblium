@@ -7,7 +7,6 @@ import dev.vdrenkov.biblium.service.ClientService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,9 +21,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
-/**
- * ClientController component.
- */
 @RestController
 @RequestMapping("/clients")
 public class ClientController {
@@ -32,24 +28,10 @@ public class ClientController {
 
     private final ClientService clientService;
 
-    /**
-     * Handles ClientController operation.
-     *
-     * @param clientService
-     *     Service dependency used by this component.
-     */
-    @Autowired
     public ClientController(final ClientService clientService) {
         this.clientService = clientService;
     }
 
-    /**
-     * Handles addClient operation.
-     *
-     * @param clientRequest
-     *     Request payload with input data.
-     * @return Response entity containing the operation result.
-     */
     @PostMapping
     public ResponseEntity<Void> addClient(@RequestBody @Valid final ClientRequest clientRequest) {
         final Client client = clientService.addClient(clientRequest);
@@ -60,39 +42,18 @@ public class ClientController {
         return ResponseEntity.created(location).build();
     }
 
-    /**
-     * Handles getAllClients operation.
-     *
-     * @return Response entity containing the requested data.
-     */
     @GetMapping
     public ResponseEntity<List<ClientDto>> getAllClients() {
         log.info("All clients requested from the database");
         return ResponseEntity.ok(clientService.getAllClientsDto());
     }
 
-    /**
-     * Handles getClientById operation.
-     *
-     * @param id
-     *     Identifier of the target entity.
-     * @return Response entity containing the requested data.
-     */
     @GetMapping("/{id}")
     public ResponseEntity<ClientDto> getClientById(@PathVariable final int id) {
         log.info("Client with an ID {} requested from the database.", id);
         return ResponseEntity.ok(clientService.getClientDtoById(id));
     }
 
-    /**
-     * Handles deleteClient operation.
-     *
-     * @param id
-     *     Client identifier.
-     * @param returnOld
-     *     Whether to return the deleted payload instead of no-content.
-     * @return Response with deleted client payload or no-content status.
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<ClientDto> deleteClient(@PathVariable final int id,
         @RequestParam(required = false) final Boolean returnOld) {

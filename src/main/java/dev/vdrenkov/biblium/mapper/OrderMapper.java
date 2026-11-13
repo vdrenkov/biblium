@@ -10,9 +10,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * OrderMapper component.
- */
 public final class OrderMapper {
     private static final Logger log = LoggerFactory.getLogger(OrderMapper.class);
 
@@ -20,13 +17,6 @@ public final class OrderMapper {
         /* This utility class should not be instantiated */
     }
 
-    /**
-     * Handles mapOrdersToOrdersDto operation.
-     *
-     * @param orders
-     *     Order entities to map.
-     * @return List of order DTOs.
-     */
     public static List<OrderDto> mapOrdersToOrdersDto(final List<Order> orders) {
         final List<OrderDto> ordersDto = new ArrayList<>();
 
@@ -39,13 +29,6 @@ public final class OrderMapper {
         return ordersDto;
     }
 
-    /**
-     * Handles mapOrderToOrderDto operation.
-     *
-     * @param order
-     *     Order entity value.
-     * @return Resulting order DTO value.
-     */
     public static OrderDto mapOrderToOrderDto(final Order order) {
         final List<String> booksNames = new ArrayList<>();
 

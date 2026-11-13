@@ -16,9 +16,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * User component.
- */
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -42,16 +39,6 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<UserRole> userRoles;
 
-    /**
-     * Handles User operation.
-     *
-     * @param username
-     *     Username value.
-     * @param password
-     *     Password value.
-     * @param userRoles
-     *     User role entities to map.
-     */
     public User(final String username, final String password, final List<UserRole> userRoles) {
         this.username = username;
         this.password = password;

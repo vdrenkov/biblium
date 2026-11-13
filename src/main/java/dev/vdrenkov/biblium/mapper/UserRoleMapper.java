@@ -9,9 +9,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * UserRoleMapper component.
- */
 public final class UserRoleMapper {
     private static final Logger log = LoggerFactory.getLogger(UserRoleMapper.class);
 
@@ -19,13 +16,6 @@ public final class UserRoleMapper {
         /* This utility class should not be instantiated */
     }
 
-    /**
-     * Handles mapUserRolesToUserRolesDto operation.
-     *
-     * @param userRoles
-     *     User role entities to map.
-     * @return List of userRole DTOs.
-     */
     public static List<UserRoleDto> mapUserRolesToUserRolesDto(final List<UserRole> userRoles) {
         final List<UserRoleDto> userRolesDto = new ArrayList<>();
 
@@ -38,13 +28,6 @@ public final class UserRoleMapper {
         return userRolesDto;
     }
 
-    /**
-     * Handles mapUserRoleToUserRoleDto operation.
-     *
-     * @param userRole
-     *     User role entity value.
-     * @return Resulting userRole DTO value.
-     */
     public static UserRoleDto mapUserRoleToUserRoleDto(final UserRole userRole) {
         log.debug("User role mapped to user role DTO");
         return new UserRoleDto(userRole.getRole());

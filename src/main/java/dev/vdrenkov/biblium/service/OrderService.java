@@ -11,7 +11,6 @@ import dev.vdrenkov.biblium.repository.OrderRepository;
 import dev.vdrenkov.biblium.request.OrderRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,9 +19,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-/**
- * OrderService component.
- */
 @Service
 public class OrderService {
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
@@ -31,17 +27,6 @@ public class OrderService {
     private final ClientService clientService;
     private final OrderRepository orderRepository;
 
-    /**
-     * Handles OrderService operation.
-     *
-     * @param bookService
-     *     Service dependency used by this component.
-     * @param clientService
-     *     Service dependency used by this component.
-     * @param orderRepository
-     *     Repository dependency used by this component.
-     */
-    @Autowired
     public OrderService(final BookService bookService, final ClientService clientService,
         final OrderRepository orderRepository) {
         this.bookService = bookService;
@@ -49,13 +34,6 @@ public class OrderService {
         this.orderRepository = orderRepository;
     }
 
-    /**
-     * Handles addOrder operation.
-     *
-     * @param orderRequest
-     *     Request payload with input data.
-     * @return Resulting order value.
-     */
     @Transactional
     public Order addOrder(final OrderRequest orderRequest) {
         if (orderRequest.getBooksIds().isEmpty()) {
@@ -78,70 +56,31 @@ public class OrderService {
         return orderRepository.save(new Order(client, books, issueDate, issueDate.plusMonths(1)));
     }
 
-    /**
-     * Handles decreaseBooksQuantities operation.
-     *
-     * @param booksIds
-     *     Collection of target entity identifiers.
-     */
     private void decreaseBooksQuantities(final List<Integer> booksIds) {
         for (final int bookId : booksIds) {
             bookService.decreaseBookQuantity(bookId);
         }
     }
 
-    /**
-     * Handles getAllOrders operation.
-     *
-     * @return List of orders.
-     */
     public List<Order> getAllOrders() {
         log.info("Trying to retrieve all orders");
         return orderRepository.findAll();
     }
 
-    /**
-     * Handles getAllOrdersDto operation.
-     *
-     * @return List of order DTOs.
-     */
     @Transactional(readOnly = true)
     public List<OrderDto> getAllOrdersDto() {
         return OrderMapper.mapOrdersToOrdersDto(getAllOrders());
     }
 
-    /**
-     * Handles getAllOrdersByClient operation.
-     *
-     * @param clientId
-     *     Identifier of the target entity.
-     * @return List of orders.
-     */
     public List<Order> getAllOrdersByClient(final int clientId) {
         return orderRepository.findByClientId(clientId);
     }
 
-    /**
-     * Handles getAllOrdersDtoByClient operation.
-     *
-     * @param clientId
-     *     Identifier of the target entity.
-     * @return List of order DTOs.
-     */
     @Transactional(readOnly = true)
     public List<OrderDto> getAllOrdersDtoByClient(final int clientId) {
         return OrderMapper.mapOrdersToOrdersDto(getAllOrdersByClient(clientId));
     }
 
-    /**
-     * Handles getAllOrdersByDate operation.
-     *
-     * @param choice
-     *     Option selector value.
-     * @param date
-     *     Date value.
-     * @return List of orders.
-     */
     public List<Order> getAllOrdersByDate(final int choice, final LocalDate date) {
         validateOrderDateChoice(choice);
         return switch (choice) {
@@ -155,55 +94,21 @@ public class OrderService {
         };
     }
 
-    /**
-     * Handles getAllOrdersDtoByDate operation.
-     *
-     * @param choice
-     *     Option selector value.
-     * @param date
-     *     Date value.
-     * @return List of order DTOs.
-     */
     @Transactional(readOnly = true)
     public List<OrderDto> getAllOrdersDtoByDate(final int choice, final String date) {
         return OrderMapper.mapOrdersToOrdersDto(getAllOrdersByDate(choice, LocalDateMapper.mapStringToDate(date)));
     }
 
-    /**
-     * Handles getOrderById operation.
-     *
-     * @param id
-     *     Identifier of the target entity.
-     * @return Resulting order value.
-     */
     public Order getOrderById(final int id) {
         log.info("Trying to find order with an ID {}", id);
         return orderRepository.findById(id).orElseThrow(OrderNotFoundException::new);
     }
 
-    /**
-     * Handles getOrderDtoById operation.
-     *
-     * @param id
-     *     Identifier of the target entity.
-     * @return Resulting order DTO value.
-     */
     @Transactional(readOnly = true)
     public OrderDto getOrderDtoById(final int id) {
         return OrderMapper.mapOrderToOrderDto(getOrderById(id));
     }
 
-    /**
-     * Handles extendOrderDueByDate operation.
-     *
-     * @param orderId
-     *     Identifier of the target entity.
-     * @param choice
-     *     Option selector value.
-     * @param period
-     *     Extension period value.
-     * @return Resulting order DTO value.
-     */
     @Transactional
     public OrderDto extendOrderDueByDate(final int orderId, final int choice, final int period) {
         final Order order = getOrderById(orderId);
@@ -229,24 +134,12 @@ public class OrderService {
         return oldOrder;
     }
 
-    /**
-     * Handles validateNoDuplicateBookIds operation.
-     *
-     * @param booksIds
-     *     Collection of target entity identifiers.
-     */
     private static void validateNoDuplicateBookIds(final List<Integer> booksIds) {
         if (new HashSet<>(booksIds).size() != booksIds.size()) {
             throw new IllegalArgumentException("Duplicate book IDs are not allowed in a single order");
         }
     }
 
-    /**
-     * Handles validateOrderDateChoice operation.
-     *
-     * @param choice
-     *     Option selector value.
-     */
     private static void validateOrderDateChoice(final int choice) {
         if (choice < 1 || choice > 6) {
             throw new IllegalArgumentException("Choice must be between 1 and 6");

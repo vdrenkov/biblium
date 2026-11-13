@@ -9,9 +9,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * BookMapper component.
- */
 public final class BookMapper {
     private static final Logger log = LoggerFactory.getLogger(BookMapper.class);
 
@@ -19,13 +16,6 @@ public final class BookMapper {
         /* This utility class should not be instantiated */
     }
 
-    /**
-     * Handles mapBooksToBooksDto operation.
-     *
-     * @param books
-     *     Books included in the order.
-     * @return List of book DTOs.
-     */
     public static List<BookDto> mapBooksToBooksDto(final List<Book> books) {
         final List<BookDto> booksDto = new ArrayList<>();
 
@@ -38,13 +28,6 @@ public final class BookMapper {
         return booksDto;
     }
 
-    /**
-     * Handles mapBookToBookDto operation.
-     *
-     * @param book
-     *     Book entity value.
-     * @return Resulting book DTO value.
-     */
     public static BookDto mapBookToBookDto(final Book book) {
         log.debug("Book mapped to book DTO");
         return new BookDto(book.getId(), book.getName(), book.getPublishDate(),

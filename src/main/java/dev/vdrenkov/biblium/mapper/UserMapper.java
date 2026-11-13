@@ -9,9 +9,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * UserMapper component.
- */
 public final class UserMapper {
     private static final Logger log = LoggerFactory.getLogger(UserMapper.class);
 
@@ -19,13 +16,6 @@ public final class UserMapper {
         /* This utility class should not be instantiated */
     }
 
-    /**
-     * Handles mapUsersToUsersDto operation.
-     *
-     * @param users
-     *     User entities to map.
-     * @return List of user DTOs.
-     */
     public static List<UserDto> mapUsersToUsersDto(final List<User> users) {
         final List<UserDto> usersDto = new ArrayList<>();
 
@@ -38,13 +28,6 @@ public final class UserMapper {
         return usersDto;
     }
 
-    /**
-     * Handles mapUserToUserDto operation.
-     *
-     * @param user
-     *     User entity value.
-     * @return Resulting user DTO value.
-     */
     public static UserDto mapUserToUserDto(final User user) {
         log.debug("User mapped to user DTO");
         return new UserDto(user.getUsername(), UserRoleMapper.mapUserRolesToUserRolesDto(user.getUserRoles()));

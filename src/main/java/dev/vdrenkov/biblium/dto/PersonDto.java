@@ -3,9 +3,6 @@ package dev.vdrenkov.biblium.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-/**
- * PersonDto component.
- */
 @AllArgsConstructor
 @Data
 public class PersonDto {

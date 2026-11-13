@@ -16,9 +16,6 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 
-/**
- * Book component.
- */
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -45,18 +42,6 @@ public class Book {
     @Column(name = "quantity")
     private int quantity;
 
-    /**
-     * Handles Book operation.
-     *
-     * @param name
-     *     Name value.
-     * @param publishDate
-     *     Book publish date.
-     * @param author
-     *     Author entity value.
-     * @param quantity
-     *     Quantity value.
-     */
     public Book(String name, LocalDate publishDate, Author author, int quantity) {
         this.name = name;
         this.publishDate = publishDate;
