@@ -12,6 +12,9 @@ import dev.vdrenkov.biblium.request.ClientRequest;
 import dev.vdrenkov.biblium.request.CreateUserRequest;
 import dev.vdrenkov.biblium.request.UserRequest;
 import dev.vdrenkov.biblium.service.OrderService;
+import dev.vdrenkov.biblium.service.BookService;
+import jakarta.persistence.EntityManagerFactory;
+import org.hibernate.SessionFactory;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,6 +95,12 @@ class BibliumIT {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private BookService bookService;
+
+    @Autowired
+    private EntityManagerFactory entityManagerFactory;
+
     @org.springframework.beans.factory.annotation.Value("${local.server.port}")
     private int serverPort;
 
@@ -125,6 +134,28 @@ class BibliumIT {
                     .build();
                 assertEquals(201, client.send(author, java.net.http.HttpResponse.BodyHandlers.ofString()).statusCode());
             }
+        }
+    }
+
+    @Test
+    void listRecords_multipleLoansAndAuthors_usesOneQueryPerList() throws Exception {
+        final Session admin = login("integration_admin", PASSWORD);
+        for (int index = 0; index < 3; index++) {
+            final Fixture fixture = createFixture(admin, 2);
+            create(admin, "/orders", new OrderRequest(fixture.clientId(), List.of(fixture.bookId())));
+        }
+        final var statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
+        statistics.setStatisticsEnabled(true);
+
+        try {
+            statistics.clear();
+            assertTrue(orderService.getAllOrdersDto().size() >= 3);
+            assertEquals(1, statistics.getPrepareStatementCount());
+            statistics.clear();
+            assertTrue(bookService.getAllAvailableBooksDto().size() >= 3);
+            assertEquals(1, statistics.getPrepareStatementCount());
+        } finally {
+            statistics.setStatisticsEnabled(false);
         }
     }
 
