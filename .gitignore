@@ -5,7 +5,6 @@ target/
 logs/
 *.iml
 .env
-application.*
 
 # File-based project format
 *.iws
