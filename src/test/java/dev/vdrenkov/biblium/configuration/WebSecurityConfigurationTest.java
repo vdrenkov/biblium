@@ -81,11 +81,12 @@ class WebSecurityConfigurationTest {
     }
 
     @Test
-    void testCsrf_publicEndpoint_accessibleWithoutAuthentication() throws Exception {
+    void getCsrfToken_publicEndpoint_returnsTokenWithHttpOnlyCookie() throws Exception {
         mockMvc
             .perform(get("/csrf"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.token").isNotEmpty())
+            .andExpect(cookie().httpOnly("XSRF-TOKEN", true))
             .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("XSRF-TOKEN=")));
     }
 

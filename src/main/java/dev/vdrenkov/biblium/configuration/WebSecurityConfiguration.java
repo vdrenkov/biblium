@@ -53,7 +53,7 @@ public class WebSecurityConfiguration {
     SecurityFilterChain securityFilterChain(final HttpSecurity httpSecurity) {
         httpSecurity
             .csrf(csrf -> csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .csrfTokenRepository(new CookieCsrfTokenRepository())
                 .csrfTokenRequestHandler(csrfTokenRequestHandler())
                 .sessionAuthenticationStrategy(new NullAuthenticatedSessionStrategy()))
             .authorizeHttpRequests(auth -> auth
