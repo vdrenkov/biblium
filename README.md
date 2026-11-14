@@ -102,4 +102,4 @@ roles have application permissions.
 
 ## Acknowledgments
 
-This is a personal portfolio project by Valentin Drenkov and is not for redistribution.
+This is a personal portfolio project and is not for redistribution.
