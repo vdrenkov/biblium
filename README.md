@@ -94,10 +94,12 @@ Run unit tests alone with `.\mvnw.cmd test`. On Linux and macOS, use `./mvnw`.
 GitHub Actions runs the full build and tests, then scans the packaged runtime dependencies with
 Trivy.
 
-## Limitations and acknowledgments
+## Limitations
 
 Borrowing decrements stock; a book-return workflow is not implemented. Logout clears the browser
 cookie; an already-issued JWT remains valid until its one-hour expiry. Only ADMIN and LIBRARIAN
 roles have application permissions.
+
+## Acknowledgments
 
 This is a personal portfolio project by Valentin Drenkov and is not for redistribution.
